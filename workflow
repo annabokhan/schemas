@@ -1,5 +1,5 @@
 {
-    "$id": "https://serverlessworkflow.io/schemas/0.8/workflow.json",
+    "$id": "https://github.com/annabokhan/schemas/edit/main/workflow.json",
     "$schema": "http://json-schema.org/draft-07/schema#",
     "description": "Serverless Workflow specification - workflow schema",
     "type": "object",
