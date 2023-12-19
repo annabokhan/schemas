@@ -1,5 +1,5 @@
 {
-    "$id": "https://github.com/annabokhan/schemas/edit/main/tap.json",
+    "$id": "https://github.com/annabokhan/schemas/blob/main/tap.json",
     "$schema" : "http://json-schema.org/draft-07/schema#",
     "description" : "Extensible tap - a workflow that allows plugins to extend its functionality. Adheres to a subset of Serverless Workflow specification",
     "type" : "object",
