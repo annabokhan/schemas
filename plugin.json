@@ -1,4 +1,5 @@
 {
+    "$id": "https://github.com/annabokhan/schemas/edit/main/plugin.json",
     "$schema" : "http://json-schema.org/draft-07/schema#",
     "description" : "Plugin extending functionality of a specific tap specified in metadata.extends. Adheres to a subset of Serverless Workflow specification",
     "required" : [
