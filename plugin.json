@@ -106,35 +106,6 @@
         "additionalProperties" : false,
         "required" : []
       },
-      "errors" : {
-        "type" : "array",
-        "description" : "Workflow Error definitions. Defines checked errors that can be explicitly handled during workflow execution",
-        "items" : {
-          "type" : "object",
-          "properties" : {
-            "name" : {
-              "type" : "string",
-              "description" : "Domain-specific error name",
-              "minLength" : 1
-            },
-            "code" : {
-              "type" : "string",
-              "description" : "Error code. Can be used in addition to the name to help runtimes resolve to technical errors/exceptions. Should not be defined if error is set to '*'",
-              "minLength" : 1
-            },
-            "description" : {
-              "type" : "string",
-              "description" : "Error description"
-            }
-          },
-          "additionalProperties" : false,
-          "required" : [
-            "name"
-          ]
-        },
-        "additionalItems" : false,
-        "minItems" : 1
-      },
       "metadata" : {
         "type" : "object",
         "description" : "Metadata information",
@@ -168,7 +139,14 @@
             },
             "type" : {
               "type" : "string",
-              "description" : "CloudEvent type"
+              "description" : "CloudEvent type",
+              "enum" : [
+                "contracts:cloudevent/platform:association.observed.v1",
+                "contracts:cloudevent/platform:entity.observed.v1",
+                "contracts:cloudevent/platform:extension.observed.v1",
+                "contracts:cloudevent/platform:measurement.received.v1",
+                "contracts:cloudevent/platform:event.processed.v1"
+              ]
             },
             "kind" : {
               "type" : "string",
@@ -218,72 +196,6 @@
           "required" : [
             "name",
             "operation"
-          ]
-        },
-        "additionalItems" : false,
-        "minItems" : 1
-      },
-      "autoRetries" : {
-        "type" : "boolean",
-        "default" : false,
-        "description" : "If set to true, actions should automatically be retried on unchecked errors. Default is false"
-      },
-      "retries" : {
-        "type" : "array",
-        "description" : "Workflow Retry definitions. Define retry strategies that can be referenced in states onError definitions",
-        "items" : {
-          "type" : "object",
-          "properties" : {
-            "name" : {
-              "type" : "string",
-              "description" : "Unique retry strategy name",
-              "minLength" : 1
-            },
-            "delay" : {
-              "type" : "string",
-              "description" : "Time delay between retry attempts (ISO 8601 duration format)"
-            },
-            "maxDelay" : {
-              "type" : "string",
-              "description" : "Maximum time delay between retry attempts (ISO 8601 duration format)"
-            },
-            "increment" : {
-              "type" : "string",
-              "description" : "Static value by which the delay increases during each attempt (ISO 8601 time format)"
-            },
-            "multiplier" : {
-              "type" : [
-                "number",
-                "string"
-              ],
-              "minimum" : 0,
-              "minLength" : 1,
-              "multipleOf" : 0.01,
-              "description" : "Numeric value, if specified the delay between retries is multiplied by this value."
-            },
-            "maxAttempts" : {
-              "type" : [
-                "number",
-                "string"
-              ],
-              "minimum" : 1,
-              "minLength" : 0,
-              "description" : "Maximum number of retry attempts."
-            },
-            "jitter" : {
-              "type" : [
-                "number",
-                "string"
-              ],
-              "minimum" : 0,
-              "maximum" : 1,
-              "description" : "If float type, maximum amount of random time added or subtracted from the delay between each retry relative to total delay (between 0 and 1). If string type, absolute maximum amount of random time added or subtracted from the delay between each retry (ISO 8601 duration format)"
-            }
-          },
-          "additionalProperties" : false,
-          "required" : [
-            "name",
-            "maxAttempts"
           ]
         },
         "additionalItems" : false,
@@ -345,70 +257,11 @@
                   "$ref" : "#/definitions/produceeventdef"
                 },
                 "additionalItems" : false
-              },
-              "compensate" : {
-                "type" : "boolean",
-                "default" : false,
-                "description" : "If set to true, triggers workflow compensation when before this transition is taken. Default is false"
               }
             },
             "additionalProperties" : false,
             "required" : [
               "nextState"
-            ]
-          }
-        ]
-      },
-      "error" : {
-        "type" : "object",
-        "properties" : {
-          "errorRef" : {
-            "type" : "string",
-            "description" : "Reference to a unique workflow error definition. Used of errorRefs is not used",
-            "minLength" : 1
-          },
-          "errorRefs" : {
-            "type" : "array",
-            "description" : "References one or more workflow error definitions. Used if errorRef is not used",
-            "minItems" : 1,
-            "items" : {
-              "type" : "string"
-            },
-            "additionalItems" : false
-          },
-          "transition" : {
-            "description" : "Transition to next state to handle the error.",
-            "$ref" : "#/definitions/transition"
-          },
-          "end" : {
-            "description" : "End workflow execution in case of this error.",
-            "$ref" : "#/definitions/end"
-          }
-        },
-        "additionalProperties" : false,
-        "oneOf" : [
-          {
-            "required" : [
-              "errorRef",
-              "transition"
-            ]
-          },
-          {
-            "required" : [
-              "errorRef",
-              "end"
-            ]
-          },
-          {
-            "required" : [
-              "errorRefs",
-              "transition"
-            ]
-          },
-          {
-            "required" : [
-              "errorRefs",
-              "end"
             ]
           }
         ]
@@ -431,28 +284,6 @@
           "subFlowRef" : {
             "description" : "References a sub-workflow to invoke",
             "$ref" : "#/definitions/subflowref"
-          },
-          "retryRef" : {
-            "type" : "string",
-            "description" : "References a defined workflow retry definition. If not defined the default retry policy is assumed"
-          },
-          "nonRetryableErrors" : {
-            "type" : "array",
-            "description" : "List of unique references to defined workflow errors for which the action should not be retried. Used only when `autoRetries` is set to `true`",
-            "minItems" : 1,
-            "items" : {
-              "type" : "string"
-            },
-            "additionalItems" : false
-          },
-          "retryableErrors" : {
-            "type" : "array",
-            "description" : "List of unique references to defined workflow errors for which the action should be retried. Used only when `autoRetries` is set to `false`",
-            "minItems" : 1,
-            "items" : {
-              "type" : "string"
-            },
-            "additionalItems" : false
           },
           "actionDataFilter" : {
             "description" : "Action data filter",
@@ -696,71 +527,33 @@
             },
             "required" : []
           },
-          "onErrors" : {
-            "type" : "array",
-            "description" : "States error handling definitions",
-            "items" : {
-              "type" : "object",
-              "$ref" : "#/definitions/error"
-            },
-            "additionalItems" : false
-          },
           "transition" : {
             "description" : "Next transition of the workflow after all the actions have been performed",
             "$ref" : "#/definitions/transition"
-          },
-          "compensatedBy" : {
-            "type" : "string",
-            "minLength" : 1,
-            "description" : "Unique Name of a workflow state which is responsible for compensation of this state"
-          },
-          "usedForCompensation" : {
-            "type" : "boolean",
-            "default" : false,
-            "description" : "If true, this state is used to compensate another state. Default is false"
           },
           "metadata" : {
             "$ref" : "#/properties/metadata"
           }
         },
         "additionalProperties" : false,
-        "if" : {
-          "properties" : {
-            "usedForCompensation" : {
-              "const" : true
-            }
+        "oneOf" : [
+          {
+            "required" : [
+              "name",
+              "type",
+              "actions",
+              "end"
+            ]
           },
-          "required" : [
-            "usedForCompensation"
-          ]
-        },
-        "then" : {
-          "required" : [
-            "name",
-            "type",
-            "actions"
-          ]
-        },
-        "else" : {
-          "oneOf" : [
-            {
-              "required" : [
-                "name",
-                "type",
-                "actions",
-                "end"
-              ]
-            },
-            {
-              "required" : [
-                "name",
-                "type",
-                "actions",
-                "transition"
-              ]
-            }
-          ]
-        }
+          {
+            "required" : [
+              "name",
+              "type",
+              "actions",
+              "transition"
+            ]
+          }
+        ]
       },
       "parallelstate" : {
         "type" : "object",
@@ -823,71 +616,33 @@
             "minLength" : 0,
             "description" : "Used when completionType is set to 'atLeast' to specify the minimum number of branches that must complete before the state will transition."
           },
-          "onErrors" : {
-            "type" : "array",
-            "description" : "States error handling definitions",
-            "items" : {
-              "type" : "object",
-              "$ref" : "#/definitions/error"
-            },
-            "additionalItems" : false
-          },
           "transition" : {
             "description" : "Next transition of the workflow after all branches have completed execution",
             "$ref" : "#/definitions/transition"
-          },
-          "compensatedBy" : {
-            "type" : "string",
-            "minLength" : 1,
-            "description" : "Unique Name of a workflow state which is responsible for compensation of this state"
-          },
-          "usedForCompensation" : {
-            "type" : "boolean",
-            "default" : false,
-            "description" : "If true, this state is used to compensate another state. Default is false"
           },
           "metadata" : {
             "$ref" : "#/properties/metadata"
           }
         },
         "additionalProperties" : false,
-        "if" : {
-          "properties" : {
-            "usedForCompensation" : {
-              "const" : true
-            }
+        "oneOf" : [
+          {
+            "required" : [
+              "name",
+              "type",
+              "branches",
+              "end"
+            ]
           },
-          "required" : [
-            "usedForCompensation"
-          ]
-        },
-        "then" : {
-          "required" : [
-            "name",
-            "type",
-            "branches"
-          ]
-        },
-        "else" : {
-          "oneOf" : [
-            {
-              "required" : [
-                "name",
-                "type",
-                "branches",
-                "end"
-              ]
-            },
-            {
-              "required" : [
-                "name",
-                "type",
-                "branches",
-                "transition"
-              ]
-            }
-          ]
-        }
+          {
+            "required" : [
+              "name",
+              "type",
+              "branches",
+              "transition"
+            ]
+          }
+        ]
       },
       "switchstate" : {
         "type" : "object",
@@ -925,28 +680,9 @@
             },
             "additionalItems" : false
           },
-          "onErrors" : {
-            "type" : "array",
-            "description" : "States error handling definitions",
-            "items" : {
-              "type" : "object",
-              "$ref" : "#/definitions/error"
-            },
-            "additionalItems" : false
-          },
           "defaultCondition" : {
             "description" : "Default transition of the workflow if there is no matching data conditions. Can include a transition or end definition",
             "$ref" : "#/definitions/defaultconditiondef"
-          },
-          "compensatedBy" : {
-            "type" : "string",
-            "minLength" : 1,
-            "description" : "Unique Name of a workflow state which is responsible for compensation of this state"
-          },
-          "usedForCompensation" : {
-            "type" : "boolean",
-            "default" : false,
-            "description" : "If true, this state is used to compensate another state. Default is false"
           },
           "metadata" : {
             "$ref" : "#/properties/metadata"
@@ -1051,88 +787,6 @@
           "end"
         ]
       },
-      "injectstate" : {
-        "type" : "object",
-        "description" : "Inject static data into state data. Does not perform any actions",
-        "properties" : {
-          "name" : {
-            "type" : "string",
-            "description" : "State name"
-          },
-          "type" : {
-            "type" : "string",
-            "const" : "inject",
-            "description" : "State type"
-          },
-          "end" : {
-            "$ref" : "#/definitions/end",
-            "description" : "State end definition"
-          },
-          "data" : {
-            "type" : "object",
-            "description" : "JSON object which can be set as states data input and can be manipulated via filters"
-          },
-          "stateDataFilter" : {
-            "description" : "State data filter",
-            "$ref" : "#/definitions/statedatafilter"
-          },
-          "transition" : {
-            "description" : "Next transition of the workflow after injection has completed",
-            "$ref" : "#/definitions/transition"
-          },
-          "compensatedBy" : {
-            "type" : "string",
-            "minLength" : 1,
-            "description" : "Unique Name of a workflow state which is responsible for compensation of this state"
-          },
-          "usedForCompensation" : {
-            "type" : "boolean",
-            "default" : false,
-            "description" : "If true, this state is used to compensate another state. Default is false"
-          },
-          "metadata" : {
-            "$ref" : "#/properties/metadata"
-          }
-        },
-        "additionalProperties" : false,
-        "if" : {
-          "properties" : {
-            "usedForCompensation" : {
-              "const" : true
-            }
-          },
-          "required" : [
-            "usedForCompensation"
-          ]
-        },
-        "then" : {
-          "required" : [
-            "name",
-            "type",
-            "data"
-          ]
-        },
-        "else" : {
-          "oneOf" : [
-            {
-              "required" : [
-                "name",
-                "type",
-                "data",
-                "end"
-              ]
-            },
-            {
-              "required" : [
-                "name",
-                "type",
-                "data",
-                "transition"
-              ]
-            }
-          ]
-        }
-      },
       "foreachstate" : {
         "type" : "object",
         "description" : "Execute a set of defined actions or workflows for each element of a data array",
@@ -1197,28 +851,9 @@
             "description" : "State data filter",
             "$ref" : "#/definitions/statedatafilter"
           },
-          "onErrors" : {
-            "type" : "array",
-            "description" : "States error handling definitions",
-            "items" : {
-              "type" : "object",
-              "$ref" : "#/definitions/error"
-            },
-            "additionalItems" : false
-          },
           "transition" : {
             "description" : "Next transition of the workflow after state has completed",
             "$ref" : "#/definitions/transition"
-          },
-          "compensatedBy" : {
-            "type" : "string",
-            "minLength" : 1,
-            "description" : "Unique Name of a workflow state which is responsible for compensation of this state"
-          },
-          "usedForCompensation" : {
-            "type" : "boolean",
-            "default" : false,
-            "description" : "If true, this state is used to compensate another state. Default is false"
           },
           "mode" : {
             "type" : "string",
@@ -1234,46 +869,26 @@
           }
         },
         "additionalProperties" : false,
-        "if" : {
-          "properties" : {
-            "usedForCompensation" : {
-              "const" : true
-            }
+        "oneOf" : [
+          {
+            "required" : [
+              "name",
+              "type",
+              "inputCollection",
+              "actions",
+              "end"
+            ]
           },
-          "required" : [
-            "usedForCompensation"
-          ]
-        },
-        "then" : {
-          "required" : [
-            "name",
-            "type",
-            "inputCollection",
-            "actions"
-          ]
-        },
-        "else" : {
-          "oneOf" : [
-            {
-              "required" : [
-                "name",
-                "type",
-                "inputCollection",
-                "actions",
-                "end"
-              ]
-            },
-            {
-              "required" : [
-                "name",
-                "type",
-                "inputCollection",
-                "actions",
-                "transition"
-              ]
-            }
-          ]
-        }
+          {
+            "required" : [
+              "name",
+              "type",
+              "inputCollection",
+              "actions",
+              "transition"
+            ]
+          }
+        ]
       },
       "startdef" : {
         "type" : "string",
@@ -1304,11 +919,6 @@
                   "$ref" : "#/definitions/produceeventdef"
                 },
                 "additionalItems" : false
-              },
-              "compensate" : {
-                "type" : "boolean",
-                "default" : false,
-                "description" : "If set to true, triggers workflow compensation. Default is false"
               }
             },
             "additionalProperties" : false,
@@ -1389,4 +999,5 @@
         "minLength" : 1
       }
     }
+  }
   }
