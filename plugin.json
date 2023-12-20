@@ -219,10 +219,6 @@
               "$ref" : "#/definitions/switchstate"
             },
             {
-              "title" : "Inject State",
-              "$ref" : "#/definitions/injectstate"
-            },
-            {
               "title" : "ForEach State",
               "$ref" : "#/definitions/foreachstate"
             }
@@ -232,6 +228,7 @@
         "minItems" : 1
       }
     },
+    "additionalProperties": false,
     "definitions" : {
       "transition" : {
         "oneOf" : [
@@ -999,5 +996,4 @@
         "minLength" : 1
       }
     }
-  }
   }
