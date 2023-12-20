@@ -1,5 +1,26 @@
 {
-    "$id": "https://github.com/annabokhan/schemas/blob/main/tap.json",
+  "$id": "https://cisco.com/fso/schemas/codex/tap.json",
+  "name" : "tap",
+  "identifyingProperties" : [
+    "/id"
+  ],
+  "displayNameGenerationMechanism" : "{{object.name}}",
+  "allowObjectFragments" : false,
+  "allowedLayers" : [
+    "SOLUTION"
+  ],
+  "referenceQualifiers" : {
+    "$.metadata.input" : [
+      "/contracts/jsonSchema"
+    ],
+    "$.metadata.output" : [
+      "/contracts/jsonSchema"
+    ],
+    "$.events[:].type" : [
+      "/contracts/cloudevent"
+    ]
+  },
+  "jsonSchema" : {
     "$schema" : "http://json-schema.org/draft-07/schema#",
     "description" : "Extensible tap - a workflow that allows plugins to extend its functionality. Adheres to a subset of Serverless Workflow specification",
     "type" : "object",
@@ -38,10 +59,6 @@
           "type" : "string"
         },
         "additionalItems" : false
-      },
-      "constants" : {
-        "type" : "object",
-        "description" : "Workflow constants data (object type)"
       },
       "start" : {
         "$ref" : "#/definitions/startdef"
@@ -108,46 +125,11 @@
         "additionalProperties" : false,
         "required" : []
       },
-      "errors" :  {
-        "type" : "array",
-        "description" : "Workflow Error definitions. Defines checked errors that can be explicitly handled during workflow execution",
-        "items" : {
-          "type" : "object",
-          "properties" : {
-            "name" : {
-              "type" : "string",
-              "description" : "Domain-specific error name",
-              "minLength" : 1
-            },
-            "code" : {
-              "type" : "string",
-              "description" : "Error code. Can be used in addition to the name to help runtimes resolve to technical errors/exceptions. Should not be defined if error is set to '*'",
-              "minLength" : 1
-            },
-            "description" : {
-              "type" : "string",
-              "description" : "Error description"
-            }
-          },
-          "additionalProperties" : false,
-          "required" : [
-            "name"
-          ]
-        },
-        "additionalItems" : false,
-        "minItems" : 1
-      },
       "metadata" : {
         "type" : "object",
         "description" : "Metadata information",
-        "required": ["input", "output", "pluginTransform"],
+        "required": ["input", "pluginTransform"],
         "properties" : {
-          "suspendOnError" : {
-            "description" : "Whether to suspend the workflow in case of unhandled errors. Suspended workflow can be resumed from its last processed event after the upgrade. If false, the workflow will be terminated instead",
-            "enum": ["true", "false"],
-            "default": "true",
-            "type" : "string"
-          },
           "input" : {
             "description" : "A reference to the input schema that the plugins must adhere to",
             "type" : "string"
@@ -182,7 +164,32 @@
             },
             "type" : {
               "type" : "string",
-              "description" : "CloudEvent type"
+              "description" : "CloudEvent type",
+              "enum" : [
+                "contracts:cloudevent/platform:otlp_metrics.received.v1",
+                "contracts:cloudevent/platform:metric.received.v1",
+                "contracts:cloudevent/platform:metric.processed.v1",
+                "contracts:cloudevent/platform:metric.enriched.v1",
+
+                "contracts:cloudevent/platform:otlp_logs.received.v1",
+                "contracts:cloudevent/platform:log.received.v1",
+                "contracts:cloudevent/platform:event.processed.v1",
+                "contracts:cloudevent/platform:event.enriched.v1",
+
+                "contracts:cloudevent/platform:otlp_traces.received.v1",
+                "contracts:cloudevent/platform:span.received.v1",
+                "contracts:cloudevent/platform:trace.processed.v1",
+                "contracts:cloudevent/platform:trace.enriched.v1",
+
+                "contracts:cloudevent/platform:association.observed.v1",
+
+                "contracts:cloudevent/platform:entity.observed.v1",
+                "contracts:cloudevent/platform:entity.enriched.v1",
+
+                "contracts:cloudevent/platform:extension.observed.v1",
+
+                "contracts:cloudevent/platform:measurement.received.v1"
+              ]
             },
             "kind" : {
               "type" : "string",
@@ -192,32 +199,6 @@
               ],
               "description" : "Defines the CloudEvent as either 'consumed' or 'produced' by the workflow. Default is 'consumed'",
               "default" : "consumed"
-            },
-            "correlation" : {
-              "type" : "array",
-              "description" : "CloudEvent correlation definitions",
-              "minItems" : 1,
-              "items" : {
-                "type" : "object",
-                "description" : "CloudEvent correlation definition",
-                "properties" : {
-                  "contextAttributeName" : {
-                    "type" : "string",
-                    "description" : "CloudEvent Extension Context Attribute name",
-                    "minLength" : 1
-                  },
-                  "contextAttributeValue" : {
-                    "type" : "string",
-                    "description" : "CloudEvent Extension Context Attribute value",
-                    "minLength" : 1
-                  }
-                },
-                "additionalProperties" : false,
-                "required" : [
-                  "contextAttributeName"
-                ]
-              },
-              "additionalItems" : false
             },
             "dataOnly" : {
               "type" : "boolean",
@@ -1633,3 +1614,4 @@
       }
     }
   }
+}
